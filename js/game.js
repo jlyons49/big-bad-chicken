@@ -204,8 +204,9 @@ export class BigBadChickenGame {
 
     this.renderer.camX = this.player.x;
     this.renderer.camY = this.player.y;
-    this.renderer.zoom = 1.75;
-    this.renderer.targetZoom = 1.75;
+    const initialTargetRadius = this.renderer.getTargetScreenRadius();
+    this.renderer.zoom = initialTargetRadius / this.player.size;
+    this.renderer.targetZoom = this.renderer.zoom;
 
     this.particles = [];
     this.floatingTexts = [];
@@ -464,8 +465,9 @@ export class BigBadChickenGame {
 
     // Particles & Floating Text
     this.spawnCrumbs(x, y, item.color || '#fef08a', item.tier);
+    const sizeScale = this.player.size / 24;
     if (gainedCoins >= 5) {
-      this.floatingTexts.push(new FloatingText(x, y - 20, `+${gainedCoins} 🪙`, '#facc15', 18, 0.8));
+      this.floatingTexts.push(new FloatingText(x, y - this.player.size * 0.7, `+${gainedCoins} 🪙`, '#facc15', 18, 0.8, sizeScale));
     }
 
     // Check Exponential Level Progression
@@ -476,7 +478,7 @@ export class BigBadChickenGame {
     if (this.currentLevel > prevLevel) {
       const levelDiff = this.currentLevel - prevLevel;
       if (levelDiff >= 10 || Math.random() < 0.3) {
-        this.floatingTexts.push(new FloatingText(this.player.x, this.player.y - 45, `+${formatNumber(levelDiff)} LVL!`, '#38bdf8', 22, 1.1));
+        this.floatingTexts.push(new FloatingText(this.player.x, this.player.y - this.player.size * 1.2, `+${formatNumber(levelDiff)} LVL!`, '#38bdf8', 22, 1.1, sizeScale));
       }
 
       // Check Milestone crossing

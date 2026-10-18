@@ -39,17 +39,21 @@ export class GameRenderer {
     this.shakeDuration = Math.max(this.shakeDuration, duration);
   }
 
+  getTargetScreenRadius() {
+    const minDim = Math.min(this.width, this.height);
+    return Math.max(36, Math.min(50, minDim * 0.09));
+  }
+
   updateCamera(player, dt) {
     // Smooth camera position tracking
-    this.camX += (player.x - this.camX) * Math.min(1, dt * 9);
-    this.camY += (player.y - this.camY) * Math.min(1, dt * 9);
+    this.camX += (player.x - this.camX) * Math.min(1, dt * 10);
+    this.camY += (player.y - this.camY) * Math.min(1, dt * 10);
 
-    // Dynamic Katamari Zoom Formula:
-    // Starts at 1.75 when player.size is 24
-    // Smoothly pulls back as chicken grows to house (size ~350), skyscraper (size ~1000), planet (size ~2000)
-    const baseRatio = player.size / 24;
-    this.targetZoom = Math.max(0.08, 1.75 / Math.pow(baseRatio, 0.44));
-    this.zoom += (this.targetZoom - this.zoom) * Math.min(1, dt * 5);
+    // Chicken is ALWAYS the same comfortable size on screen:
+    // targetZoom * player.size = targetScreenRadius => targetZoom = targetScreenRadius / player.size
+    const targetScreenRadius = this.getTargetScreenRadius();
+    this.targetZoom = targetScreenRadius / player.size;
+    this.zoom += (this.targetZoom - this.zoom) * Math.min(1, dt * 8);
 
     // Screen shake update
     if (this.shakeDuration > 0) {
@@ -133,8 +137,8 @@ export class GameRenderer {
 
     // Grid grass texture accents
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.lineWidth = 2;
-    const step = 200;
+    ctx.lineWidth = Math.max(1.5, 2 / this.zoom);
+    const step = Math.max(150, Math.round(90 / this.zoom / 50) * 50);
     const startX = Math.floor(Math.max(0, vL) / step) * step;
     const endX = Math.min(worldMap.width, vR);
     const startY = Math.floor(Math.max(0, vT) / step) * step;
@@ -669,11 +673,12 @@ export class GameRenderer {
       ctx.translate(ft.x, ft.y);
       ctx.globalAlpha = alpha;
 
-      ctx.font = `900 ${ft.fontSize}px 'Outfit', -apple-system, sans-serif`;
+      const renderSize = Math.max(14, ft.fontSize / this.zoom);
+      ctx.font = `900 ${renderSize}px 'Outfit', -apple-system, sans-serif`;
       ctx.textAlign = 'center';
 
       // Outline
-      ctx.lineWidth = 4;
+      ctx.lineWidth = Math.max(2, 4 / this.zoom);
       ctx.strokeStyle = '#0f172a';
       ctx.strokeText(ft.text, 0, 0);
 

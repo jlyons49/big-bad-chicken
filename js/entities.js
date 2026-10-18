@@ -42,7 +42,9 @@ export class PlayerChicken {
     this.hunger = Math.max(0, this.hunger - hungerDrainRate * dt);
 
     // 2. Movement
-    let currentSpeed = this.speed;
+    // Scale speed with size so on-screen movement speed feels constant and agile
+    const sizeScale = this.size / GAME_CONFIG.INITIAL_PLAYER_SIZE;
+    let currentSpeed = this.speed * sizeScale;
     if (isDashing && this.hunger > 5) {
       currentSpeed *= GAME_CONFIG.DASH_SPEED_MULTIPLIER;
       this.dashTimer += dt * 15;
@@ -291,7 +293,7 @@ export class Particle {
 }
 
 export class FloatingText {
-  constructor(x, y, text, color = '#fef08a', fontSize = 18, life = 1.0) {
+  constructor(x, y, text, color = '#fef08a', fontSize = 18, life = 1.0, scale = 1.0) {
     this.x = x;
     this.y = y;
     this.text = text;
@@ -299,7 +301,7 @@ export class FloatingText {
     this.fontSize = fontSize;
     this.life = life;
     this.maxLife = life;
-    this.vy = -55;
+    this.vy = -55 * Math.max(1, scale);
   }
 
   update(dt) {
