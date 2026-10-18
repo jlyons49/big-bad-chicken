@@ -660,9 +660,20 @@ html, body {
 }
 
 .equipped-perk {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-muted);
-  margin-top: 2px;
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+.equipped-pro {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.equipped-con {
+  color: #f87171;
+  font-weight: 600;
 }
 
 /* Action Buttons */
@@ -942,6 +953,44 @@ html, body {
   color: var(--text-muted);
   margin-top: 2px;
   min-height: 28px;
+}
+
+.skin-tradeoffs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.perk-pro {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  padding: 4px 6px;
+  border-radius: 6px;
+  text-align: left;
+  line-height: 1.25;
+}
+
+.perk-con {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  padding: 4px 6px;
+  border-radius: 6px;
+  text-align: left;
+  line-height: 1.25;
+}
+
+.perk-icon {
+  font-size: 10px;
+  margin-right: 2px;
 }
 
 .skin-perk {

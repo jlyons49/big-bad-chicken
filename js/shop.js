@@ -155,7 +155,10 @@ export class ShopManager {
         <div class="shop-card-info">
           <h3 class="skin-title">${skin.name}</h3>
           <p class="skin-subtitle">${skin.subtitle}</p>
-          <div class="skin-perk">⚡ ${skin.perk}</div>
+          <div class="skin-tradeoffs">
+            <div class="perk-pro"><span class="perk-icon">✨</span> ${skin.pro}</div>
+            <div class="perk-con"><span class="perk-icon">⚠️</span> ${skin.con}</div>
+          </div>
         </div>
         <div class="shop-card-action">
           ${

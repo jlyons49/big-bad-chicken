@@ -49,17 +49,35 @@ Built for the **[Hefty Raccoon Arcade Portal](https://game.heftyracoon.com)**.
     - Scaling all the way to Level 1,000,000 within 25 minutes for **+2,000 Coins**!
   - The live HUD displays your survival time and target threshold pace in real time.
 
-- **Silly Chicken Shop**:
-  - Save up hard-earned speedrun coins to unlock 9 unique, hilarious chicken skins in the Main Menu shop:
-    1. **Classic Clucker** (Default red & white barnyard rooster &bull; Free)
-    2. **Speedy Pecker** (+22% Base Sprint & Walking Speed &bull; 25 Coins)
-    3. **Shadow Chicken** (+35% Katamari Suction Vortex Range &bull; 60 Coins)
-    4. **Lava Chicken** (-25% Slower Hunger Drain &bull; 140 Coins)
-    5. **Disco Chicken** (+50% Longer Combo Window & Funky Trails &bull; 280 Coins)
-    6. **Cyber Cluck 2077** (+30% Speed & Instant Sonic Dash recharge &bull; 550 Coins)
-    7. **Golden Nugget** (+75% Extra Coins on Speedrun Milestones &bull; 1,100 Coins)
-    8. **T-Rex Chicken** (+50% Suction & Fearsome Roar Cluck &bull; 2,200 Coins)
-    9. **Cosmic Overlord** (Galaxy Singularity: +75% Suction, +50% Speed, 2.5x Coins &bull; 4,000 Coins)
+- **Silly Chicken Shop & Tradeoffs**:
+  - Save up hard-earned speedrun coins to unlock 9 unique chicken skins in the Main Menu shop. Every chicken features distinct strengths alongside a **negative curse/tradeoff**:
+    1. **Classic Clucker** (Free):
+       - ✨ **Pro**: Balanced all-rounder (zero curses or debuffs).
+       - ⚠️ **Con**: No special abilities or vacuum boosts.
+    2. **Speedy Pecker** (200 Coins):
+       - ✨ **Pro**: +35% Sprint & movement speed.
+       - ⚠️ **Con**: *Hyper Metabolism* — Hunger drains +50% faster.
+    3. **Shadow Chicken** (480 Coins):
+       - ✨ **Pro**: +50% Katamari suction vortex range.
+       - ⚠️ **Con**: *Void Sluggishness* — -20% movement speed.
+    4. **Lava Chicken** (1,120 Coins):
+       - ✨ **Pro**: *Molten Core* — -35% slower hunger drain rate.
+       - ⚠️ **Con**: *Scorched Food* — Incinerates food, yielding -30% XP & calories.
+    5. **Disco Chicken** (2,240 Coins):
+       - ✨ **Pro**: +100% longer combo window & funky trails.
+       - ⚠️ **Con**: *Distracted Grooving* — -35% smaller suction radius.
+    6. **Cyber Cluck 2077** (4,400 Coins):
+       - ✨ **Pro**: +35% Turbo speed & instant jet dash.
+       - ⚠️ **Con**: *Battery Overheat* — Jet dashing burns 3x hunger & -20% suction radius.
+    7. **Golden Nugget** (8,800 Coins):
+       - ✨ **Pro**: *Midas Touch* — +100% extra coins (2x payout!) on milestone speed clears.
+       - ⚠️ **Con**: *Solid Gold Density* — -22% movement speed & +30% higher metabolic hunger drain.
+    8. **T-Rex Chicken** (17,600 Coins):
+       - ✨ **Pro**: *Apex Predator* — Spawns +40% larger & +50% suction vortex range.
+       - ⚠️ **Con**: *Gluttonous Carnivore* — +65% brutal hunger drain rate.
+    9. **Cosmic Overlord** (32,000 Coins):
+       - ✨ **Pro**: *Cosmic Singularity* — +80% suction, +30% speed, 2.5x milestone coins.
+       - ⚠️ **Con**: *Event Horizon Decay* — +85% catastrophic hunger drain rate.
 
 - **Mobile-First & Desktop Friendly Controls**:
   - **Mobile**: Dynamic virtual joystick (touch anywhere on left/screen to steer) + tactile **⚡ DASH** button.

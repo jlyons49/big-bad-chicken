@@ -13,11 +13,11 @@ export class PlayerChicken {
     this.angle = 0;
     this.targetAngle = 0;
     
-    this.size = GAME_CONFIG.INITIAL_PLAYER_SIZE;
+    this.skin = skin;
+    this.size = GAME_CONFIG.INITIAL_PLAYER_SIZE * (skin.startSizeMult || 1.0);
     this.targetSize = this.size;
     this.hunger = GAME_CONFIG.INITIAL_HUNGER;
     
-    this.skin = skin;
     this.speed = GAME_CONFIG.BASE_SPEED * (skin.speedBonus || 1.0);
     this.suctionRangeMult = skin.suctionBonus || 1.0;
     this.hungerDrainMult = skin.hungerBonus || 1.0;
@@ -38,7 +38,7 @@ export class PlayerChicken {
     const metabolismMult = Math.pow(this.size / GAME_CONFIG.INITIAL_PLAYER_SIZE, 0.35);
     let hungerDrainRate = GAME_CONFIG.BASE_HUNGER_DRAIN * this.hungerDrainMult * metabolismMult;
     if (isDashing) {
-      hungerDrainRate *= GAME_CONFIG.DASH_HUNGER_DRAIN_RATE;
+      hungerDrainRate *= GAME_CONFIG.DASH_HUNGER_DRAIN_RATE * (this.skin.dashDrainMult || 1.0);
     }
     this.hunger = Math.max(0, this.hunger - hungerDrainRate * dt);
 

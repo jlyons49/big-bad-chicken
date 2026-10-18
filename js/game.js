@@ -184,7 +184,16 @@ export class BigBadChickenGame {
 
     const skin = shop.getEquippedSkin();
     if (equippedSkinName) equippedSkinName.textContent = skin.name;
-    if (equippedSkinPerk) equippedSkinPerk.textContent = skin.perk;
+    if (equippedSkinPerk) {
+      if (skin.pro && skin.con) {
+        equippedSkinPerk.innerHTML = `
+          <span class="equipped-pro">✨ ${skin.pro}</span><br>
+          <span class="equipped-con">⚠️ ${skin.con}</span>
+        `;
+      } else {
+        equippedSkinPerk.textContent = skin.perk;
+      }
+    }
     if (equippedPreviewCanvas) {
       shop.drawSkinPreview(equippedPreviewCanvas, skin);
     }
@@ -449,7 +458,8 @@ export class BigBadChickenGame {
 
     // Calculate Combo
     this.comboCount++;
-    this.comboTimer = GAME_CONFIG.COMBO_TIMEOUT * (this.player.skin.id === 'disco' ? 1.5 : 1.0);
+    const comboWindowMult = this.player.skin.comboWindowBonus || 1.0;
+    this.comboTimer = GAME_CONFIG.COMBO_TIMEOUT * comboWindowMult;
     if (this.comboCount >= 20) this.comboMultiplier = 3.5;
     else if (this.comboCount >= 10) this.comboMultiplier = 2.5;
     else if (this.comboCount >= 5) this.comboMultiplier = 1.8;
@@ -461,9 +471,10 @@ export class BigBadChickenGame {
 
     // Level Efficiency: early level items become basically useless once you size past them!
     const levelEfficiency = getItemLevelEfficiency(this.player.size, item.tier || 1);
+    const xpMult = this.player.skin.xpMult || 1.0;
 
     // Points & Leveling (XP/calories drives exponential level progression)
-    const gainedPoints = Math.round(item.points * this.comboMultiplier * levelEfficiency);
+    const gainedPoints = Math.round(item.points * this.comboMultiplier * levelEfficiency * xpMult);
     this.score += gainedPoints;
     this.totalCalories += gainedPoints;
 
