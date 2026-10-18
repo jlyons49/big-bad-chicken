@@ -3,8 +3,8 @@
  */
 
 export const GAME_CONFIG = {
-  WORLD_WIDTH: 5000,
-  WORLD_HEIGHT: 5000,
+  WORLD_WIDTH: 15000,
+  WORLD_HEIGHT: 15000,
   INITIAL_PLAYER_SIZE: 24,
   MAX_PLAYER_SIZE: 2200,
   BASE_SPEED: 210, // Slower, more deliberate and controllable

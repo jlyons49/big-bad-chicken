@@ -34,8 +34,9 @@ export class PlayerChicken {
   }
 
   update(dt, inputVector, isDashing) {
-    // 1. Hunger Drain
-    let hungerDrainRate = GAME_CONFIG.BASE_HUNGER_DRAIN * this.hungerDrainMult;
+    // 1. Hunger Drain - accelerates as the chicken grows (larger size = higher metabolic burn!)
+    const metabolismMult = Math.pow(this.size / GAME_CONFIG.INITIAL_PLAYER_SIZE, 0.35);
+    let hungerDrainRate = GAME_CONFIG.BASE_HUNGER_DRAIN * this.hungerDrainMult * metabolismMult;
     if (isDashing) {
       hungerDrainRate *= GAME_CONFIG.DASH_HUNGER_DRAIN_RATE;
     }

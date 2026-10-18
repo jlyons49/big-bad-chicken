@@ -12,8 +12,8 @@ export class GameRenderer {
     this.dpr = Math.min(2, window.devicePixelRatio || 1);
     
     // Camera state
-    this.camX = 2500;
-    this.camY = 2500;
+    this.camX = 7500;
+    this.camY = 7500;
     this.zoom = 1.7;
     this.targetZoom = 1.7;
     
