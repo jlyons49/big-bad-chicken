@@ -45,6 +45,13 @@ export class ShopManager {
       if (savedStats) {
         this.stats = { ...this.stats, ...JSON.parse(savedStats) };
       }
+
+      // Economy migration: Reset legacy inflated test coins down to starting purse
+      if (localStorage.getItem('bbc_econ_v2') !== 'true') {
+        this.coins = Math.min(this.coins, 10);
+        localStorage.setItem('bbc_econ_v2', 'true');
+        this.save();
+      }
     } catch (e) {
       console.warn('Error loading shop state:', e);
     }

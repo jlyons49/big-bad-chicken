@@ -107,10 +107,12 @@ export class PlayerChicken {
     this.hunger = Math.min(GAME_CONFIG.MAX_HUNGER, this.hunger + hungerRestored);
     
     // Growth formula: paced, steady scaling chicken radius per snack
-    // Requires foraging ~150-180 snacks in Tier 1 to reach Tier 2
-    const growthIncrement = Math.min(25, Math.pow(calories, 0.35) * 0.045);
-    this.targetSize = Math.min(GAME_CONFIG.MAX_PLAYER_SIZE, this.targetSize + growthIncrement);
-    this.growPulse = 1.0;
+    // Only grows if calories are gained (outgrown items give 0 growth!)
+    if (calories > 0) {
+      const growthIncrement = Math.min(25, Math.pow(calories, 0.35) * 0.045);
+      this.targetSize = Math.min(GAME_CONFIG.MAX_PLAYER_SIZE, this.targetSize + growthIncrement);
+      this.growPulse = 1.0;
+    }
     this.beakOpen = 1.0;
   }
 
@@ -136,7 +138,7 @@ export class AIChicken {
     this.size = 20 + Math.random() * 18 + (tier - 1) * 22;
     this.points = Math.round(this.size * 55);
     this.hunger = 25;
-    this.coins = Math.round(this.size * 2);
+    this.coins = tier === 1 ? 1 : tier === 2 ? 2 : 3;
     
     this.speed = 140 + Math.random() * 40;
     this.state = 'wander'; // 'wander', 'peck', 'flee', 'sucked'

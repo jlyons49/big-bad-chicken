@@ -2,7 +2,7 @@
  * Big Bad Chicken - Main Game Engine & State Coordinator
  */
 
-import { GAME_CONFIG, calculateLevelData, formatNumber } from './constants.js';
+import { GAME_CONFIG, calculateLevelData, formatNumber, getItemLevelEfficiency } from './constants.js';
 import { PlayerChicken, Particle, FloatingText } from './entities.js';
 import { WorldMap } from './map.js';
 import { GameRenderer } from './renderer.js';
@@ -443,24 +443,34 @@ export class BigBadChickenGame {
     // Upbeat music tempo ramping with combo
     sound.setTempoMultiplier(1.0 + Math.min(0.35, this.comboCount * 0.015));
 
-    // Points & Leveling
-    const gainedPoints = Math.round(item.points * this.comboMultiplier);
+    // Level Efficiency: early level items become basically useless once you size past them!
+    const efficiency = getItemLevelEfficiency(this.player.size, item.tier || 1);
+
+    // Points & Leveling (XP/calories drives exponential level progression)
+    const gainedPoints = Math.round(item.points * this.comboMultiplier * efficiency);
     this.score += gainedPoints;
     this.totalCalories += gainedPoints;
 
-    // Coins
-    const gainedCoins = Math.max(1, Math.round(item.coins * playerCoinMult(this.player.skin) * this.comboMultiplier));
-    this.sessionCoins += gainedCoins;
+    // Coins - Scarce & Challenging Economy
+    // Common everyday foods give 0 coins. Combos do NOT multiply coins (only XP/score).
+    const rawCoins = item.coins || 0;
+    let gainedCoins = 0;
+    if (rawCoins > 0) {
+      gainedCoins = Math.max(1, Math.round(rawCoins * playerCoinMult(this.player.skin)));
+      this.sessionCoins += gainedCoins;
+    }
 
-    // Feed player
-    this.player.feed(item.points, item.hunger);
+    // Feed player: growth increment is 0 if gainedPoints is 0
+    // Hunger is restored, though diminished for outgrown crumbs
+    const hungerRestored = efficiency > 0 ? item.hunger : Math.min(0.3, item.hunger * 0.05);
+    this.player.feed(gainedPoints, hungerRestored);
 
     // Audio SFX
     sound.eat(item.tier);
     if (isChicken) {
       sound.cluck(true);
       this.renderer.addScreenShake(8, 0.25);
-    } else if (item.tier >= 4) {
+    } else if (item.tier >= 4 && efficiency > 0) {
       this.renderer.addScreenShake(Math.min(14, item.tier * 2.5), 0.2);
     }
 
@@ -469,24 +479,26 @@ export class BigBadChickenGame {
     const sizeScale = this.player.size / 24;
     const isGolden = item.template && item.template.isGolden;
 
-    // ALWAYS show coin indicator on every eaten snack!
-    this.floatingTexts.push(
-      new FloatingText(
-        x,
-        y - this.player.size * 0.75,
-        `+${gainedCoins} 🪙`,
-        isGolden ? '#fef08a' : '#facc15',
-        Math.max(16, 14 + Math.min(10, Math.round(gainedCoins * 0.3))),
-        0.85,
-        sizeScale
-      )
-    );
+    // Floating Coin text (ONLY when actual coins are earned!)
+    if (gainedCoins > 0) {
+      this.floatingTexts.push(
+        new FloatingText(
+          x,
+          y - this.player.size * 0.75,
+          `+${gainedCoins} 🪙`,
+          isGolden ? '#fef08a' : '#facc15',
+          Math.max(16, 14 + Math.min(10, Math.round(gainedCoins * 0.3))),
+          0.85,
+          sizeScale
+        )
+      );
 
-    // Bump the HUD coin counter with visual bounce animation
-    if (this.hudCoinCardEl) {
-      this.hudCoinCardEl.classList.remove('bump');
-      void this.hudCoinCardEl.offsetWidth;
-      this.hudCoinCardEl.classList.add('bump');
+      // Bump the HUD coin counter with visual bounce animation
+      if (this.hudCoinCardEl) {
+        this.hudCoinCardEl.classList.remove('bump');
+        void this.hudCoinCardEl.offsetWidth;
+        this.hudCoinCardEl.classList.add('bump');
+      }
     }
 
     if (isGolden) {
@@ -618,7 +630,7 @@ export class BigBadChickenGame {
     if (!this.comboBadgeEl || !this.comboTextEl) return;
     if (this.comboCount >= 2) {
       this.comboBadgeEl.classList.add('active');
-      this.comboTextEl.textContent = `${this.comboCount}x COMBO (${this.comboMultiplier.toFixed(1)}x COINS & XP!)`;
+      this.comboTextEl.textContent = `${this.comboCount}x COMBO (${this.comboMultiplier.toFixed(1)}x XP & SCORE!)`;
     } else {
       this.comboBadgeEl.classList.remove('active');
     }
