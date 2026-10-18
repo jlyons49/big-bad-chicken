@@ -138,7 +138,7 @@ export class AIChicken {
     this.size = 20 + Math.random() * 18 + (tier - 1) * 22;
     this.points = Math.round(this.size * 55);
     this.hunger = 25;
-    this.coins = tier === 1 ? 1 : tier === 2 ? 2 : 3;
+    this.coins = 0; // Coins only earned through milestone speed thresholds!
     
     this.speed = 140 + Math.random() * 40;
     this.state = 'wander'; // 'wander', 'peck', 'flee', 'sucked'

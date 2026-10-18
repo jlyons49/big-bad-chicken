@@ -63,8 +63,15 @@
         </div>
       </div>
 
-      <!-- HUD Right Actions: Coins & Pause -->
+      <!-- HUD Right Actions: Timer, Coins & Pause -->
       <div class="hud-right-group">
+        <div id="hudTimerCard" class="hud-card timer-card">
+          <div class="timer-row">
+            <span class="timer-icon">⏱️</span>
+            <span id="hudRunTimer" class="timer-value">0:00</span>
+          </div>
+          <span id="hudNextThreshold" class="timer-threshold">Next: Lvl 10 &lt; 0:25</span>
+        </div>
         <div id="hudCoinCard" class="hud-card coin-card">
           <span class="coin-icon">🪙</span>
           <span id="hudCoins" class="coin-value">0</span>
@@ -129,7 +136,7 @@
           <span class="coin-guide-icon">🪙</span>
           <div class="coin-guide-text">
             <strong>HOW TO EARN COINS:</strong>
-            <p>Hunt rare glowing Golden snacks, smash piggy banks, defeat rival chickens, and devour entire vehicles &amp; skyscrapers to save up coins for the Shop!</p>
+            <p>Coins are awarded <em>only</em> by reaching Level Milestones within speed thresholds (e.g. Level 10 &lt; 25s, Level 50 &lt; 60s)! Eating food gives 0 coins—you must feast fast to beat the clock!</p>
           </div>
         </div>
 
@@ -220,6 +227,10 @@
           <div class="go-stat-row">
             <span>Items Eaten:</span>
             <strong id="gameOverEaten">0</strong>
+          </div>
+          <div class="go-stat-row">
+            <span>Survival Time:</span>
+            <strong id="gameOverTime">0:00</strong>
           </div>
           <div class="go-stat-row coins-earned">
             <span>Coins Earned:</span>

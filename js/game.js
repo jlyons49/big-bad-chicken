@@ -2,7 +2,15 @@
  * Big Bad Chicken - Main Game Engine & State Coordinator
  */
 
-import { GAME_CONFIG, calculateLevelData, formatNumber, getItemLevelEfficiency } from './constants.js';
+import { 
+  GAME_CONFIG, 
+  calculateLevelData, 
+  formatNumber, 
+  formatTime,
+  getItemLevelEfficiency, 
+  getItemHungerEfficiency,
+  LEVEL_MILESTONES 
+} from './constants.js';
 import { PlayerChicken, Particle, FloatingText } from './entities.js';
 import { WorldMap } from './map.js';
 import { GameRenderer } from './renderer.js';
@@ -157,6 +165,9 @@ export class BigBadChickenGame {
     this.comboBadgeEl = document.getElementById('comboBadge');
     this.comboTextEl = document.getElementById('comboText');
     this.milestoneBannerEl = document.getElementById('milestoneBanner');
+    this.hudRunTimerEl = document.getElementById('hudRunTimer');
+    this.hudNextThresholdEl = document.getElementById('hudNextThreshold');
+    this.hudTimerCardEl = document.getElementById('hudTimerCard');
   }
 
   updateMenuHUD() {
@@ -219,6 +230,8 @@ export class BigBadChickenGame {
     this.comboCount = 0;
     this.comboTimer = 0;
     this.comboMultiplier = 1.0;
+    this.runTimer = 0;
+    this.claimedMilestones = new Set();
 
     // Reset UI
     document.getElementById('mainMenu').classList.remove('active');
@@ -270,6 +283,8 @@ export class BigBadChickenGame {
     document.getElementById('gameOverScore').textContent = this.score.toLocaleString();
     document.getElementById('gameOverEaten').textContent = this.itemsEaten.toLocaleString();
     document.getElementById('gameOverCoins').textContent = `+${this.sessionCoins.toLocaleString()}`;
+    const gameOverTimeEl = document.getElementById('gameOverTime');
+    if (gameOverTimeEl) gameOverTimeEl.textContent = formatTime(this.runTimer);
 
     const levelData = calculateLevelData(this.totalCalories);
     document.getElementById('gameOverTitle').textContent = `${levelData.badge} ${levelData.currentTierTitle}`;
@@ -302,6 +317,7 @@ export class BigBadChickenGame {
   }
 
   update(dt) {
+    this.runTimer += dt;
     const player = this.player;
 
     // 1. Update Controls
@@ -444,25 +460,19 @@ export class BigBadChickenGame {
     sound.setTempoMultiplier(1.0 + Math.min(0.35, this.comboCount * 0.015));
 
     // Level Efficiency: early level items become basically useless once you size past them!
-    const efficiency = getItemLevelEfficiency(this.player.size, item.tier || 1);
+    const levelEfficiency = getItemLevelEfficiency(this.player.size, item.tier || 1);
 
     // Points & Leveling (XP/calories drives exponential level progression)
-    const gainedPoints = Math.round(item.points * this.comboMultiplier * efficiency);
+    const gainedPoints = Math.round(item.points * this.comboMultiplier * levelEfficiency);
     this.score += gainedPoints;
     this.totalCalories += gainedPoints;
 
-    // Coins - Scarce & Challenging Economy
-    // Common everyday foods give 0 coins. Combos do NOT multiply coins (only XP/score).
-    const rawCoins = item.coins || 0;
-    let gainedCoins = 0;
-    if (rawCoins > 0) {
-      gainedCoins = Math.max(1, Math.round(rawCoins * playerCoinMult(this.player.skin)));
-      this.sessionCoins += gainedCoins;
-    }
+    // Hunger Efficiency: hunger filled by things smaller than you falls off steeply!
+    // Giant chickens get virtually zero hunger from tiny snacks and must hunt large prey.
+    const hungerEfficiency = getItemHungerEfficiency(this.player.size, item.tier || 1, item.size);
+    const hungerRestored = item.hunger * hungerEfficiency;
 
     // Feed player: growth increment is 0 if gainedPoints is 0
-    // Hunger is restored, though diminished for outgrown crumbs
-    const hungerRestored = efficiency > 0 ? item.hunger : Math.min(0.3, item.hunger * 0.05);
     this.player.feed(gainedPoints, hungerRestored);
 
     // Audio SFX
@@ -470,40 +480,13 @@ export class BigBadChickenGame {
     if (isChicken) {
       sound.cluck(true);
       this.renderer.addScreenShake(8, 0.25);
-    } else if (item.tier >= 4 && efficiency > 0) {
+    } else if (item.tier >= 4 && levelEfficiency > 0) {
       this.renderer.addScreenShake(Math.min(14, item.tier * 2.5), 0.2);
     }
 
-    // Particles & Floating Text
+    // Particles
     this.spawnCrumbs(x, y, item.color || '#fef08a', item.tier);
     const sizeScale = this.player.size / 24;
-    const isGolden = item.template && item.template.isGolden;
-
-    // Floating Coin text (ONLY when actual coins are earned!)
-    if (gainedCoins > 0) {
-      this.floatingTexts.push(
-        new FloatingText(
-          x,
-          y - this.player.size * 0.75,
-          `+${gainedCoins} 🪙`,
-          isGolden ? '#fef08a' : '#facc15',
-          Math.max(16, 14 + Math.min(10, Math.round(gainedCoins * 0.3))),
-          0.85,
-          sizeScale
-        )
-      );
-
-      // Bump the HUD coin counter with visual bounce animation
-      if (this.hudCoinCardEl) {
-        this.hudCoinCardEl.classList.remove('bump');
-        void this.hudCoinCardEl.offsetWidth;
-        this.hudCoinCardEl.classList.add('bump');
-      }
-    }
-
-    if (isGolden) {
-      sound.coin();
-    }
 
     // Check Exponential Level Progression
     const prevLevel = this.currentLevel;
@@ -512,32 +495,68 @@ export class BigBadChickenGame {
 
     if (this.currentLevel > prevLevel) {
       const levelDiff = this.currentLevel - prevLevel;
-      if (levelDiff >= 10 || Math.random() < 0.3) {
-        this.floatingTexts.push(new FloatingText(this.player.x, this.player.y - this.player.size * 1.2, `+${formatNumber(levelDiff)} LVL!`, '#38bdf8', 22, 1.1, sizeScale));
+      if (levelDiff >= 10 || Math.random() < 0.25) {
+        this.floatingTexts.push(
+          new FloatingText(
+            this.player.x,
+            this.player.y - this.player.size * 1.2,
+            `+${formatNumber(levelDiff)} LVL!`,
+            '#38bdf8',
+            22,
+            1.1,
+            sizeScale
+          )
+        );
       }
+      sound.levelUp();
+    }
 
-      // Check Milestone crossing
-      if (Math.floor(this.currentLevel / 100) > Math.floor(prevLevel / 100) ||
-          this.currentLevel >= 10 && prevLevel < 10 ||
-          this.currentLevel >= 1000 && prevLevel < 1000 ||
-          this.currentLevel >= 10000 && prevLevel < 10000 ||
-          this.currentLevel >= 100000 && prevLevel < 100000 ||
-          this.currentLevel >= 1000000 && prevLevel < 1000000) {
-        this.triggerMilestone(levelData);
-      } else {
-        sound.levelUp();
+    // Check Speedrun Milestone Thresholds - COINS ARE EARNED ONLY HERE!
+    for (let i = 0; i < LEVEL_MILESTONES.length; i++) {
+      const m = LEVEL_MILESTONES[i];
+      if (m.coins > 0 && this.currentLevel >= m.level && !this.claimedMilestones.has(m.level)) {
+        this.claimedMilestones.add(m.level);
+        const withinTime = this.runTimer <= m.targetSeconds;
+        let earnedCoins = 0;
+
+        if (withinTime) {
+          earnedCoins = Math.max(1, Math.round(m.coins * playerCoinMult(this.player.skin)));
+          this.sessionCoins += earnedCoins;
+
+          this.floatingTexts.push(
+            new FloatingText(
+              this.player.x,
+              this.player.y - this.player.size * 1.6,
+              `⚡ UNDER ${formatTime(m.targetSeconds)}! +${earnedCoins} 🪙`,
+              '#facc15',
+              28,
+              1.5,
+              sizeScale
+            )
+          );
+
+          if (this.hudCoinCardEl) {
+            this.hudCoinCardEl.classList.remove('bump');
+            void this.hudCoinCardEl.offsetWidth;
+            this.hudCoinCardEl.classList.add('bump');
+          }
+        }
+
+        this.triggerMilestone(m, withinTime, earnedCoins);
       }
     }
 
     this.updateComboUI();
   }
 
-  triggerMilestone(levelData) {
-    sound.milestone();
+  triggerMilestone(milestone, withinTime, earnedCoins) {
+    if (withinTime) {
+      sound.milestone();
+    }
     this.renderer.addScreenShake(12, 0.4);
     this.controls.haptic(60);
 
-    // Fireworks particles
+    // Celebration fireworks particles
     for (let i = 0; i < 45; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 120 + Math.random() * 260;
@@ -555,18 +574,29 @@ export class BigBadChickenGame {
     }
 
     if (this.milestoneBannerEl) {
-      this.milestoneBannerEl.innerHTML = `
-        <div class="milestone-badge">${levelData.badge}</div>
-        <div class="milestone-text">
-          <div class="milestone-sub">NEW EXPONENTIAL TIER REACHED!</div>
-          <div class="milestone-title">${levelData.currentTierTitle}</div>
-          <div class="milestone-lvl">LEVEL ${levelData.formattedLevel}</div>
-        </div>
-      `;
+      if (withinTime) {
+        this.milestoneBannerEl.innerHTML = `
+          <div class="milestone-badge">${milestone.badge}</div>
+          <div class="milestone-text">
+            <div class="milestone-sub">⚡ SPEED THRESHOLD CONQUERED!</div>
+            <div class="milestone-title">${milestone.title} &bull; LEVEL ${formatNumber(milestone.level)}</div>
+            <div class="milestone-lvl">Time: <strong>${formatTime(this.runTimer)}</strong> (Goal &lt; ${formatTime(milestone.targetSeconds)}) &bull; <strong style="color:#fde047;font-size:14px;">+${earnedCoins} 🪙</strong></div>
+          </div>
+        `;
+      } else {
+        this.milestoneBannerEl.innerHTML = `
+          <div class="milestone-badge">${milestone.badge}</div>
+          <div class="milestone-text">
+            <div class="milestone-sub">TIER MILESTONE REACHED</div>
+            <div class="milestone-title">${milestone.title} &bull; LEVEL ${formatNumber(milestone.level)}</div>
+            <div class="milestone-lvl">Time: ${formatTime(this.runTimer)} (Threshold &lt; ${formatTime(milestone.targetSeconds)} expired &bull; 0 🪙)</div>
+          </div>
+        `;
+      }
       this.milestoneBannerEl.classList.add('show');
       setTimeout(() => {
         this.milestoneBannerEl.classList.remove('show');
-      }, 2600);
+      }, 3400);
     }
   }
 
@@ -590,6 +620,36 @@ export class BigBadChickenGame {
 
   updateHUD() {
     if (!this.player) return;
+
+    // Run Timer & Next Threshold Target
+    if (this.hudRunTimerEl) {
+      this.hudRunTimerEl.textContent = formatTime(this.runTimer);
+    }
+    if (this.hudNextThresholdEl) {
+      let nextMilestone = null;
+      for (let i = 0; i < LEVEL_MILESTONES.length; i++) {
+        const m = LEVEL_MILESTONES[i];
+        if (m.coins > 0 && !this.claimedMilestones.has(m.level)) {
+          nextMilestone = m;
+          break;
+        }
+      }
+
+      if (nextMilestone) {
+        const isAhead = this.runTimer <= nextMilestone.targetSeconds;
+        this.hudNextThresholdEl.textContent = `Goal: Lvl ${formatNumber(nextMilestone.level)} < ${formatTime(nextMilestone.targetSeconds)}`;
+        if (this.hudTimerCardEl) {
+          this.hudTimerCardEl.classList.toggle('on-pace', isAhead);
+          this.hudTimerCardEl.classList.toggle('behind-pace', !isAhead);
+        }
+      } else {
+        this.hudNextThresholdEl.textContent = 'All Thresholds Cleared!';
+        if (this.hudTimerCardEl) {
+          this.hudTimerCardEl.classList.add('on-pace');
+          this.hudTimerCardEl.classList.remove('behind-pace');
+        }
+      }
+    }
 
     // Hunger Bar
     const hungerPct = Math.max(0, Math.min(100, this.player.hunger));

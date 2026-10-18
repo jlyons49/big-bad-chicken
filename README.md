@@ -22,37 +22,44 @@ Built for the **[Hefty Raccoon Arcade Portal](https://game.heftyracoon.com)**.
     - 🐥 **Level 10**: *Yard Pecking Order*
     - 🌱 **Level 50**: *Garden Menace*
     - 🐔 **Level 100**: *Barnyard Terror*
-    - 🐓 **Level 500**: *Apex Rooster*
-    - 🏘️ **Level 1,000**: *Township Devourer*
-    - 🚗 **Level 5,000**: *Suburban Leviathan*
-    - 🦖 **Level 10,000**: *Kaiju Clucker*
-    - 🏙️ **Level 50,000**: *Skyscraper Crusher*
-    - 🌆 **Level 100,000**: *Metropolis Feaster*
-    - 🌋 **Level 500,000**: *Titan of the Coop*
-    - 🌌 **Level 1,000,000**: *COSMIC APOCALYPSE CHICKEN*
+    - 🐓 **Level 500**: *Apex Rooster* (Goal < 3m 30s &bull; +65 🪙)
+    - 🏘️ **Level 1,000**: *Township Devourer* (Goal < 5m 20s &bull; +100 🪙)
+    - 🚗 **Level 5,000**: *Suburban Leviathan* (Goal < 7m 30s &bull; +150 🪙)
+    - 🦖 **Level 10,000**: *Kaiju Clucker* (Goal < 10m &bull; +220 🪙)
+    - 🏙️ **Level 50,000**: *Skyscraper Crusher* (Goal < 13m &bull; +350 🪙)
+    - 🌆 **Level 100,000**: *Metropolis Feaster* (Goal < 16m &bull; +500 🪙)
+    - 🌋 **Level 500,000**: *Titan of the Coop* (Goal < 20m &bull; +800 🪙)
+    - 🌌 **Level 1,000,000**: *COSMIC APOCALYPSE CHICKEN* (Goal < 25m &bull; +2,000 🪙)
 
-- **The Hunger Bar**:
-  - Your chicken has a lightning-fast metabolism. The hunger bar constantly drains!
+- **The Hunger Bar & Aggressive Falloff**:
+  - Your chicken has a lightning-fast metabolism that accelerates as you grow larger!
+  - **Steep Hunger Falloff**: The amount of hunger replenished by objects smaller than you drops off aggressively:
+    - Items within your tier and size give full nourishment.
+    - As you outgrow snacks, their hunger replenishment plunges according to $(\text{optimalSize} / \text{playerSize})^{2.5}$.
+    - Items from outgrown tiers give 0% to 1% hunger. Giant chickens cannot survive on backyard seeds; you must continually hunt massive prey to stay alive!
   - If your hunger reaches zero, you starve and lose.
-  - Feast continuously to maintain stamina and trigger feasting combo streaks.
   - Tension heartbeat audio pulse and screen vignette warn you when hunger falls below 25%.
 
-- **Roaming AI Chickens**:
-  - Other chickens wander the farmyard, pecking seeds and strutting.
-  - When you grow larger than them, they panic, squawk, and flee—chase them down for massive feasts!
+- **Speedrun Milestone Coin Economy**:
+  - **Zero Coins from Food**: Devouring everyday items, seeds, animals, or structures awards score, calories, and growth, but **0 coins**.
+  - **Coins Are Earned ONLY via Speedrun Milestones**: Beat the clock by reaching exponential level-up tiers within strict target time thresholds!
+    - Level 10 within 25s: **+15 Coins**
+    - Level 50 within 60s: **+25 Coins**
+    - Level 100 within 120s: **+40 Coins**
+    - Scaling all the way to Level 1,000,000 within 25 minutes for **+2,000 Coins**!
+  - The live HUD displays your survival time and target threshold pace in real time.
 
-- **Silly Chicken Shop & Economy**:
-  - Earn gold coins from everything you consume and combos.
-  - Unlock and equip 9 unique, hilarious chicken skins in the Main Menu shop:
-    1. **Classic Clucker** (Default red & white barnyard rooster)
-    2. **Speedy Pecker** (+22% Base Sprint & Walking Speed)
-    3. **Shadow Chicken** (+35% Katamari Suction Vortex Range)
-    4. **Lava Chicken** (-25% Slower Hunger Drain)
-    5. **Disco Chicken** (+50% Longer Combo Window & Funky Trails)
-    6. **Cyber Cluck 2077** (+30% Speed & Instant Sonic Dash recharge)
-    7. **Golden Nugget** (+75% Extra Coins on everything eaten)
-    8. **T-Rex Chicken** (+50% Suction & Fearsome Roar Cluck)
-    9. **Cosmic Overlord** (Galaxy Singularity: +75% Suction, +50% Speed, 2.5x Coins)
+- **Silly Chicken Shop**:
+  - Save up hard-earned speedrun coins to unlock 9 unique, hilarious chicken skins in the Main Menu shop:
+    1. **Classic Clucker** (Default red & white barnyard rooster &bull; Free)
+    2. **Speedy Pecker** (+22% Base Sprint & Walking Speed &bull; 25 Coins)
+    3. **Shadow Chicken** (+35% Katamari Suction Vortex Range &bull; 60 Coins)
+    4. **Lava Chicken** (-25% Slower Hunger Drain &bull; 140 Coins)
+    5. **Disco Chicken** (+50% Longer Combo Window & Funky Trails &bull; 280 Coins)
+    6. **Cyber Cluck 2077** (+30% Speed & Instant Sonic Dash recharge &bull; 550 Coins)
+    7. **Golden Nugget** (+75% Extra Coins on Speedrun Milestones &bull; 1,100 Coins)
+    8. **T-Rex Chicken** (+50% Suction & Fearsome Roar Cluck &bull; 2,200 Coins)
+    9. **Cosmic Overlord** (Galaxy Singularity: +75% Suction, +50% Speed, 2.5x Coins &bull; 4,000 Coins)
 
 - **Mobile-First & Desktop Friendly Controls**:
   - **Mobile**: Dynamic virtual joystick (touch anywhere on left/screen to steer) + tactile **⚡ DASH** button.

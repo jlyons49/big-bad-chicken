@@ -46,10 +46,10 @@ export class ShopManager {
         this.stats = { ...this.stats, ...JSON.parse(savedStats) };
       }
 
-      // Economy migration: Reset legacy inflated test coins down to starting purse
-      if (localStorage.getItem('bbc_econ_v2') !== 'true') {
-        this.coins = Math.min(this.coins, 10);
-        localStorage.setItem('bbc_econ_v2', 'true');
+      // Economy migration: Reset legacy coins so coins are earned purely through milestone speed thresholds!
+      if (localStorage.getItem('bbc_econ_v3') !== 'true') {
+        this.coins = 0;
+        localStorage.setItem('bbc_econ_v3', 'true');
         this.save();
       }
     } catch (e) {
