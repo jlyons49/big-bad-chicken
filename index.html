@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Big Bad Chicken - The Hole.io / Katamari Poultry Devourer</title>
+  <meta name="description" content="Control a ferocious chicken, eat seeds, chickens, cows, and skyscrapers, level up to Level 1,000,000, and unlock silly chickens in the shop!">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Canvas Screen -->
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Mobile Virtual Joystick Elements -->
+    <div id="joystickBase" class="joystick-base">
+      <div id="joystickThumb" class="joystick-thumb"></div>
+    </div>
+
+    <!-- Mobile Dash Action Button -->
+    <button id="dashBtn" class="dash-btn hidden interactive-ui" aria-label="Dash">
+      <div class="dash-inner">
+        <span class="dash-icon">⚡</span>
+        <span class="dash-label">DASH</span>
+      </div>
+    </button>
+
+    <!-- Top Milestone Banner -->
+    <div id="milestoneBanner" class="milestone-banner"></div>
+
+    <!-- IN-GAME HUD -->
+    <div id="gameHUD" class="game-hud">
+      <!-- Hunger Bar (Top Left) -->
+      <div id="hungerContainer" class="hud-card hunger-card">
+        <div class="hud-label-row">
+          <span class="hud-icon">🍗</span>
+          <span class="hud-label">HUNGER</span>
+          <span id="hungerText" class="hud-value">100%</span>
+        </div>
+        <div class="bar-track hunger-track">
+          <div id="hungerFill" class="bar-fill hunger-fill" style="width: 100%;"></div>
+        </div>
+      </div>
+
+      <!-- Exponential Level Bar (Top Center) -->
+      <div id="levelContainer" class="hud-card level-card">
+        <div class="level-top-row">
+          <span id="levelBadge" class="level-badge">🐣</span>
+          <div class="level-info">
+            <div class="level-title-row">
+              <span id="levelTitle" class="level-title">Hatchling</span>
+              <span class="level-tag">LVL <strong id="levelNumber">1</strong></span>
+            </div>
+            <div class="bar-track level-track">
+              <div id="levelFill" class="bar-fill level-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HUD Right Actions: Coins & Pause -->
+      <div class="hud-right-group">
+        <div class="hud-card coin-card">
+          <span class="coin-icon">🪙</span>
+          <span id="hudCoins" class="coin-value">0</span>
+        </div>
+        <button id="pauseBtn" class="hud-circle-btn interactive-ui" title="Pause Game">⏸️</button>
+      </div>
+
+      <!-- Combo Indicator -->
+      <div id="comboBadge" class="combo-badge">
+        <span class="combo-fire">🔥</span>
+        <span id="comboText" class="combo-text">2x COMBO</span>
+      </div>
+    </div>
+
+    <!-- MAIN MENU OVERLAY -->
+    <div id="mainMenu" class="modal-overlay active">
+      <div class="menu-content">
+        <!-- Back to Arcade Portal Link -->
+        <a href="../../index.html" class="portal-back-btn" title="Return to Hefty Raccoon Arcade">
+          <span>←</span> Arcade Portal
+        </a>
+
+        <!-- Sound & Music Toggles (Top Corner) -->
+        <div class="menu-audio-controls">
+          <button id="soundToggleBtn" class="audio-btn interactive-ui" title="Toggle Sound">🔊</button>
+          <button id="musicToggleBtn" class="audio-btn interactive-ui" title="Toggle Music">🎵</button>
+        </div>
+
+        <div class="title-container">
+          <div class="title-chicken-icon">🐔</div>
+          <h1 class="game-title">
+            <span class="title-big">BIG BAD</span>
+            <span class="title-chicken">CHICKEN</span>
+          </h1>
+          <p class="tagline">Eat seeds. Eat cows. Eat skyscrapers. Climb to <strong>Level 1,000,000</strong>!</p>
+        </div>
+
+        <!-- Equipped Skin Preview Card -->
+        <div class="equipped-card">
+          <div class="preview-canvas-wrap">
+            <canvas id="equippedPreviewCanvas" width="90" height="90"></canvas>
+          </div>
+          <div class="equipped-details">
+            <div class="equipped-badge">CURRENT CHICKEN</div>
+            <h2 id="equippedSkinName" class="equipped-name">Classic Clucker</h2>
+            <p id="equippedSkinPerk" class="equipped-perk">Ready to peck everything into oblivion</p>
+          </div>
+        </div>
+
+        <!-- Main Action Buttons -->
+        <div class="menu-action-buttons">
+          <button id="playBtn" class="btn btn-primary play-btn">
+            <span class="btn-icon">▶</span> START DEVOURING
+          </button>
+          <button id="shopBtn" class="btn btn-secondary shop-btn">
+            <span class="btn-icon">🛒</span> CHICKEN SHOP
+          </button>
+        </div>
+
+        <!-- Career Stats Strip -->
+        <div class="stats-strip">
+          <div class="stat-box">
+            <div class="stat-label">COINS</div>
+            <div id="menuCoins" class="stat-val">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">HIGH SCORE</div>
+            <div id="menuHighScore" class="stat-val">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">MAX LEVEL</div>
+            <div id="menuMaxLevel" class="stat-val">1</div>
+          </div>
+        </div>
+
+        <!-- Control Instructions (Phone & Desktop) -->
+        <div class="instructions-card">
+          <div class="instruction-col">
+            <span class="platform-icon">📱</span>
+            <strong>Mobile:</strong> Drag anywhere to steer. Tap <strong>⚡ DASH</strong> to sprint.
+          </div>
+          <div class="instruction-col">
+            <span class="platform-icon">💻</span>
+            <strong>Desktop:</strong> <strong>WASD / Arrows</strong> or <strong>Mouse</strong> to steer. <strong>Spacebar</strong> to sprint.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHICKEN SHOP MODAL -->
+    <div id="shopModal" class="modal-overlay">
+      <div class="modal-card shop-modal-card">
+        <div class="modal-header">
+          <div class="header-title-wrap">
+            <h2 class="modal-title">🐔 CHICKEN SHOP</h2>
+            <div class="shop-balance">
+              <span class="coin-icon">🪙</span>
+              <span id="shopCoins">0</span>
+            </div>
+          </div>
+          <button id="closeShopBtn" class="btn-close interactive-ui" aria-label="Close Shop">✕</button>
+        </div>
+        <p class="shop-desc">Spend your coins on silly, overpowered breeds of chickens!</p>
+
+        <div id="shopItemsContainer" class="shop-grid">
+          <!-- Dynamically populated by shop.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- PAUSE MODAL -->
+    <div id="pauseModal" class="modal-overlay">
+      <div class="modal-card pause-modal-card">
+        <h2 class="modal-title">PAUSED</h2>
+        <div class="pause-actions">
+          <button id="resumeBtn" class="btn btn-primary">RESUME</button>
+          <button id="restartBtn" class="btn btn-secondary">RESTART RUN</button>
+          <button id="quitBtn" class="btn btn-outline">MAIN MENU</button>
+          <a href="../../index.html" class="portal-link-btn">← ARCADE PORTAL</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div id="gameOverModal" class="modal-overlay">
+      <div class="modal-card game-over-card">
+        <div class="game-over-icon">💀</div>
+        <h2 class="modal-title game-over-title">HUNGER DEPLETED!</h2>
+        <p class="game-over-sub">Your chicken starved! You must never stop feasting!</p>
+
+        <div class="game-over-stats">
+          <div class="go-stat-row highlight">
+            <span>Peak Level:</span>
+            <strong id="gameOverLevel">1</strong>
+          </div>
+          <div class="go-stat-row">
+            <span>Title Reached:</span>
+            <strong id="gameOverTitle">🐣 Hatchling</strong>
+          </div>
+          <div class="go-stat-row">
+            <span>Final Score:</span>
+            <strong id="gameOverScore">0</strong>
+          </div>
+          <div class="go-stat-row">
+            <span>Items Eaten:</span>
+            <strong id="gameOverEaten">0</strong>
+          </div>
+          <div class="go-stat-row coins-earned">
+            <span>Coins Earned:</span>
+            <strong id="gameOverCoins">+0</strong>
+          </div>
+        </div>
+
+        <div class="game-over-actions">
+          <button id="playAgainBtn" class="btn btn-primary">PECK AGAIN</button>
+          <button id="gameOverMenuBtn" class="btn btn-secondary">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>
