@@ -202,6 +202,11 @@ export class BigBadChickenGame {
     this.player = new PlayerChicken(this.worldMap.centerX, this.worldMap.centerY, equippedSkin);
     this.worldMap.populateInitialWorld();
 
+    this.renderer.camX = this.player.x;
+    this.renderer.camY = this.player.y;
+    this.renderer.zoom = 1.75;
+    this.renderer.targetZoom = 1.75;
+
     this.particles = [];
     this.floatingTexts = [];
     this.score = 0;
@@ -332,8 +337,11 @@ export class BigBadChickenGame {
       }
     }
 
-    // 5. Update World Population & Respawning
-    this.worldMap.maintainPopulation(player);
+    // 5. Update World Population & Respawning (throttled)
+    this.worldMap.maintainPopulation(player, dt);
+
+    const suctionRad = player.getSuctionRadius();
+    const suctionSq = suctionRad * suctionRad;
 
     // 6. Update AI Chickens
     for (let i = this.worldMap.aiChickens.length - 1; i >= 0; i--) {
@@ -344,17 +352,21 @@ export class BigBadChickenGame {
       if (player.canEat(ai.size)) {
         const dx = player.x - ai.x;
         const dy = player.y - ai.y;
-        const dist = Math.hypot(dx, dy);
+        const distSq = dx * dx + dy * dy;
 
-        if (dist <= player.getSuctionRadius()) {
+        if (distSq <= suctionSq) {
           ai.state = 'sucked';
-          const step = Math.max(380, GAME_CONFIG.SUCTION_SPEED * (player.size / 24)) * dt;
-          ai.x += (dx / dist) * step;
-          ai.y += (dy / dist) * step;
+          const dist = Math.sqrt(distSq);
+          if (dist > 0.001) {
+            const step = Math.max(380, GAME_CONFIG.SUCTION_SPEED * (player.size / 24)) * dt;
+            ai.x += (dx / dist) * step;
+            ai.y += (dy / dist) * step;
+          }
           ai.size = Math.max(4, ai.size - dt * 25);
 
           if (dist <= Math.max(16, player.size * 0.4)) {
-            // Eaten AI chicken!
+            // Eaten AI chicken - remove before consumeItem
+            this.worldMap.aiChickens.splice(i, 1);
             this.consumeItem({
               name: 'Rival Chicken',
               points: ai.points,
@@ -362,26 +374,34 @@ export class BigBadChickenGame {
               coins: ai.coins,
               tier: 3,
             }, ai.x, ai.y, true);
-
-            this.worldMap.aiChickens.splice(i, 1);
-            continue;
           }
         }
       }
     }
 
     // 7. Update Consumables & Suction
-    const nearbyItems = this.worldMap.getItemsInRadius(player.x, player.y, player.getSuctionRadius() + 150);
-    for (let i = 0; i < nearbyItems.length; i++) {
-      const item = nearbyItems[i];
+    for (let i = this.worldMap.items.length - 1; i >= 0; i--) {
+      const item = this.worldMap.items[i];
+      if (item.isEaten) {
+        this.worldMap.items.splice(i, 1);
+        continue;
+      }
+
+      const dx = player.x - item.x;
+      const dy = player.y - item.y;
+      const distSq = dx * dx + dy * dy;
+
+      // Only trigger suction if player is bigger and item is within suction radius
+      if (!item.isSucked && player.canEat(item.size) && distSq <= suctionSq) {
+        item.isSucked = true;
+      }
+
+      // If being sucked into mouth
       if (item.isSucked) {
         const swallowed = item.updateSuction(dt, player);
         if (swallowed) {
-          // Remove from world map items
-          const idx = this.worldMap.items.indexOf(item);
-          if (idx !== -1) {
-            this.worldMap.items.splice(idx, 1);
-          }
+          // Remove from world map items before calling consumeItem
+          this.worldMap.items.splice(i, 1);
           this.consumeItem(item, item.x, item.y, false);
         }
       }

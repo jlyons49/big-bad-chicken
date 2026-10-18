@@ -125,6 +125,10 @@ class SoundEngine {
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
+    if (this.lastEatTime && now - this.lastEatTime < 0.05) {
+      return; // Cap eat sounds to max 20 per sec
+    }
+    this.lastEatTime = now;
     
     // Bubble / Vacuum Pop sound
     const osc = this.ctx.createOscillator();
@@ -214,6 +218,10 @@ class SoundEngine {
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
+    if (this.lastLevelUpTime && now - this.lastLevelUpTime < 0.16) {
+      return;
+    }
+    this.lastLevelUpTime = now;
     const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
     notes.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();

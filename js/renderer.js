@@ -196,19 +196,12 @@ export class GameRenderer {
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
+      if (item.isEaten) continue;
+
       // Quick viewport culling
       if (item.x + item.size < vL || item.x - item.size > vR ||
           item.y + item.size < vT || item.y - item.size > vB) {
         continue;
-      }
-
-      // Check suction trigger
-      const dx = player.x - item.x;
-      const dy = player.y - item.y;
-      const distSq = dx * dx + dy * dy;
-
-      if (!item.isSucked && player.canEat(item.size) && distSq <= suctionSq) {
-        item.isSucked = true;
       }
 
       ctx.save();

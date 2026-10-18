@@ -18,7 +18,7 @@ export const GAME_CONFIG = {
   HUNGER_LOW_THRESHOLD: 25, // %
   
   // Suction / Vacuum
-  SUCTION_RANGE_RATIO: 2.4, // Suction starts when item within size * this
+  SUCTION_RANGE_RATIO: 1.75, // Suction starts when item within size * 1.75
   SUCTION_SPEED: 520,
   
   // Exponential Leveling

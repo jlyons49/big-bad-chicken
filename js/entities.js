@@ -103,9 +103,8 @@ export class PlayerChicken {
   feed(calories, hungerRestored) {
     this.hunger = Math.min(GAME_CONFIG.MAX_HUNGER, this.hunger + hungerRestored);
     
-    // Growth formula: logarithmic smoothly scaling chicken radius
-    // Starts at 24, scales up to hundreds and thousands
-    const growthIncrement = Math.max(0.1, Math.pow(calories, 0.44) * 0.18);
+    // Growth formula: smooth scaling chicken radius per snack
+    const growthIncrement = Math.min(45, Math.pow(calories, 0.42) * 0.14);
     this.targetSize = Math.min(GAME_CONFIG.MAX_PLAYER_SIZE, this.targetSize + growthIncrement);
     this.growPulse = 1.0;
     this.beakOpen = 1.0;
@@ -224,6 +223,7 @@ export class ConsumableItem {
     
     // Katamari/Hole.io suction physics
     this.isSucked = false;
+    this.isEaten = false;
     this.scale = 1.0;
     this.rotation = Math.random() * Math.PI * 2;
     this.rotationSpeed = (Math.random() - 0.5) * 1.5;
@@ -231,7 +231,7 @@ export class ConsumableItem {
   }
 
   updateSuction(dt, player) {
-    if (!this.isSucked) return false;
+    if (!this.isSucked || this.isEaten) return false;
 
     // Aim for the front of the player (the beak)
     const mouthDist = player.size * 0.85;
@@ -248,6 +248,8 @@ export class ConsumableItem {
 
     if (dist <= Math.max(12, step * 1.5)) {
       // Swallowed!
+      this.isEaten = true;
+      this.isSucked = false;
       return true;
     }
 
