@@ -7,26 +7,26 @@ export const GAME_CONFIG = {
   WORLD_HEIGHT: 5000,
   INITIAL_PLAYER_SIZE: 24,
   MAX_PLAYER_SIZE: 2200,
-  BASE_SPEED: 260,
-  DASH_SPEED_MULTIPLIER: 1.85,
-  DASH_HUNGER_DRAIN_RATE: 1.75, // Extra hunger drained while dashing
+  BASE_SPEED: 210, // Slower, more deliberate and controllable
+  DASH_SPEED_MULTIPLIER: 1.6,
+  DASH_HUNGER_DRAIN_RATE: 1.5, // Extra hunger drained while dashing
   
-  // Hunger Bar
+  // Hunger Bar - tuned to match the paced gameplay
   INITIAL_HUNGER: 100,
   MAX_HUNGER: 100,
-  BASE_HUNGER_DRAIN: 3.8, // % per second
+  BASE_HUNGER_DRAIN: 1.8, // % per second (gives ~55s baseline so you don't starve unfairly)
   HUNGER_LOW_THRESHOLD: 25, // %
   
   // Suction / Vacuum
-  SUCTION_RANGE_RATIO: 1.75, // Suction starts when item within size * 1.75
-  SUCTION_SPEED: 520,
+  SUCTION_RANGE_RATIO: 1.7, // Tight, satisfying suction radius
+  SUCTION_SPEED: 460,
   
   // Exponential Leveling
   MAX_LEVEL: 1000000,
   BASE_XP: 100,
   
   // Combos
-  COMBO_TIMEOUT: 2.2, // seconds to keep combo alive
+  COMBO_TIMEOUT: 2.8, // Generous combo window
 };
 
 // Exponential Level Milestones and Titles
@@ -47,7 +47,8 @@ export const LEVEL_MILESTONES = [
 
 /**
  * Calculates exponential level from total calories/points.
- * Level climbs from 1 all the way to 1,000,000 with satisfying exponential acceleration.
+ * Paced so early levels take noticeable foraging, middle levels take dozens of farm animals,
+ * and Level 1,000,000 is an epic late-game achievement.
  */
 export function calculateLevelData(totalCalories) {
   if (totalCalories <= 0) {
@@ -60,15 +61,12 @@ export function calculateLevelData(totalCalories) {
     };
   }
 
-  // Formula: Level scales exponentially with points
-  // 100 XP -> ~Lvl 10
-  // 2,500 XP -> ~Lvl 100
-  // 35,000 XP -> ~Lvl 1,000
-  // 450,000 XP -> ~Lvl 10,000
-  // 6,000,000 XP -> ~Lvl 100,000
-  // 100,000,000 XP -> ~Lvl 1,000,000
   const normalized = Math.max(0, totalCalories);
-  let rawLevel = 1 + Math.floor(Math.pow(normalized / 12, 0.72) * 1.8 + Math.pow(normalized / 100, 1.45) * 0.08);
+  let rawLevel = 1 + Math.floor(
+    Math.pow(normalized / 45, 0.62) * 0.95 +
+    Math.pow(normalized / 800, 1.15) * 0.015 +
+    Math.pow(normalized / 12000, 1.58) * 0.0004
+  );
 
   if (rawLevel > GAME_CONFIG.MAX_LEVEL) {
     rawLevel = GAME_CONFIG.MAX_LEVEL;
@@ -126,12 +124,13 @@ export const ITEM_TIERS = [
       { id: 'grasshopper', name: 'Crispy Grasshopper', size: 11, points: 70, hunger: 7.0, coins: 4, color: '#86efac', shape: 'bug' },
       { id: 'blueberry', name: 'Sweet Blueberry', size: 10, points: 60, hunger: 6.0, coins: 3, color: '#60a5fa', shape: 'berry' },
       { id: 'bread_crumb', name: 'Golden Breadcrumb', size: 6, points: 20, hunger: 2.8, coins: 1, color: '#fed7aa', shape: 'crumb' },
+      { id: 'golden_corn', name: 'Golden Corn', size: 8, points: 80, hunger: 10.0, coins: 25, color: '#fde047', shape: 'kernel', isGolden: true },
     ]
   },
   {
     tier: 2,
     name: 'Garden Critters & Produce',
-    minPlayerSize: 32,
+    minPlayerSize: 45, // Raised from 32 to require ~150-180 tier 1 snacks
     items: [
       { id: 'white_egg', name: 'Stolen Egg', size: 15, points: 150, hunger: 10.0, coins: 8, color: '#f8fafc', shape: 'egg' },
       { id: 'field_mouse', name: 'Field Mouse', size: 18, points: 240, hunger: 13.0, coins: 12, color: '#a1a1aa', shape: 'mouse' },
@@ -139,12 +138,13 @@ export const ITEM_TIERS = [
       { id: 'red_tomato', name: 'Ripe Tomato', size: 19, points: 280, hunger: 14.0, coins: 14, color: '#ef4444', shape: 'tomato' },
       { id: 'garden_gnome', name: 'Lawn Gnome', size: 25, points: 480, hunger: 19.0, coins: 22, color: '#38bdf8', shape: 'gnome' },
       { id: 'big_pumpkin', name: 'Prize Pumpkin', size: 28, points: 650, hunger: 22.0, coins: 30, color: '#f97316', shape: 'pumpkin' },
+      { id: 'golden_egg', name: 'Golden Egg', size: 17, points: 450, hunger: 25.0, coins: 75, color: '#fbbf24', shape: 'egg', isGolden: true },
     ]
   },
   {
     tier: 3,
     name: 'Barnyard Animals & Small Obstacles',
-    minPlayerSize: 60,
+    minPlayerSize: 90,
     items: [
       { id: 'baby_rabbit', name: 'Fluffy Rabbit', size: 38, points: 1200, hunger: 25.0, coins: 50, color: '#e2e8f0', shape: 'rabbit' },
       { id: 'barn_cat', name: 'Mischievous Barn Cat', size: 48, points: 2200, hunger: 32.0, coins: 85, color: '#fb923c', shape: 'cat' },
@@ -152,12 +152,13 @@ export const ITEM_TIERS = [
       { id: 'hay_bale', name: 'Giant Hay Bale', size: 65, points: 5000, hunger: 42.0, coins: 160, color: '#fde047', shape: 'hay' },
       { id: 'wooden_fence', name: 'Fence Section', size: 52, points: 3200, hunger: 30.0, coins: 100, color: '#a16207', shape: 'fence' },
       { id: 'piglet', name: 'Muddy Pig', size: 70, points: 7000, hunger: 48.0, coins: 220, color: '#f472b6', shape: 'pig' },
+      { id: 'gold_piggy', name: 'Gold Piggy Bank', size: 45, points: 2500, hunger: 45.0, coins: 250, color: '#fbbf24', shape: 'pig', isGolden: true },
     ]
   },
   {
     tier: 4,
     name: 'Livestock & Farm Machinery',
-    minPlayerSize: 110,
+    minPlayerSize: 180,
     items: [
       { id: 'flock_sheep', name: 'Woolly Sheep', size: 85, points: 14000, hunger: 55.0, coins: 380, color: '#f1f5f9', shape: 'sheep' },
       { id: 'dairy_cow', name: 'Dairy Cow', size: 105, points: 28000, hunger: 65.0, coins: 650, color: '#1e293b', shape: 'cow' },
@@ -170,7 +171,7 @@ export const ITEM_TIERS = [
   {
     tier: 5,
     name: 'Town, Cars & Suburbia',
-    minPlayerSize: 250,
+    minPlayerSize: 380,
     items: [
       { id: 'sedan_car', name: 'Family Sedan', size: 230, points: 250000, hunger: 100.0, coins: 5000, color: '#2563eb', shape: 'car' },
       { id: 'police_cruiser', name: 'Police Cruiser', size: 245, points: 320000, hunger: 100.0, coins: 6500, color: '#0284c7', shape: 'police' },
@@ -183,7 +184,7 @@ export const ITEM_TIERS = [
   {
     tier: 6,
     name: 'Metropolis & Mega Structures',
-    minPlayerSize: 550,
+    minPlayerSize: 850,
     items: [
       { id: 'semi_truck', name: 'Semi Highway Truck', size: 520, points: 4200000, hunger: 100.0, coins: 55000, color: '#ea580c', shape: 'truck' },
       { id: 'office_block', name: 'Glass Office Block', size: 680, points: 8500000, hunger: 100.0, coins: 90000, color: '#38bdf8', shape: 'office' },
@@ -195,7 +196,7 @@ export const ITEM_TIERS = [
   {
     tier: 7,
     name: 'Cosmic & Planetary Wonders',
-    minPlayerSize: 1300,
+    minPlayerSize: 1700,
     items: [
       { id: 'mountain_peak', name: 'Alpine Mountain Peak', size: 1350, points: 80000000, hunger: 100.0, coins: 750000, color: '#64748b', shape: 'mountain' },
       { id: 'volcano_island', name: 'Active Volcano Island', size: 1550, points: 140000000, hunger: 100.0, coins: 1200000, color: '#dc2626', shape: 'volcano' },

@@ -228,6 +228,17 @@ export class GameRenderer {
         ctx.stroke();
       }
 
+      // Golden bonus item glowing aura
+      if (item.template && item.template.isGolden) {
+        ctx.beginPath();
+        ctx.arc(0, 0, item.size * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(250, 204, 21, 0.3)';
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = Math.max(1.5, 2 / this.zoom);
+        ctx.stroke();
+      }
+
       // Render shape
       this.drawItemShape(ctx, item);
 

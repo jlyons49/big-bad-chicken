@@ -153,6 +153,7 @@ export class BigBadChickenGame {
     this.levelTitleEl = document.getElementById('levelTitle');
     this.levelFillEl = document.getElementById('levelFill');
     this.hudCoinsEl = document.getElementById('hudCoins');
+    this.hudCoinCardEl = document.getElementById('hudCoinCard');
     this.comboBadgeEl = document.getElementById('comboBadge');
     this.comboTextEl = document.getElementById('comboText');
     this.milestoneBannerEl = document.getElementById('milestoneBanner');
@@ -466,8 +467,30 @@ export class BigBadChickenGame {
     // Particles & Floating Text
     this.spawnCrumbs(x, y, item.color || '#fef08a', item.tier);
     const sizeScale = this.player.size / 24;
-    if (gainedCoins >= 5) {
-      this.floatingTexts.push(new FloatingText(x, y - this.player.size * 0.7, `+${gainedCoins} 🪙`, '#facc15', 18, 0.8, sizeScale));
+    const isGolden = item.template && item.template.isGolden;
+
+    // ALWAYS show coin indicator on every eaten snack!
+    this.floatingTexts.push(
+      new FloatingText(
+        x,
+        y - this.player.size * 0.75,
+        `+${gainedCoins} 🪙`,
+        isGolden ? '#fef08a' : '#facc15',
+        Math.max(16, 14 + Math.min(10, Math.round(gainedCoins * 0.3))),
+        0.85,
+        sizeScale
+      )
+    );
+
+    // Bump the HUD coin counter with visual bounce animation
+    if (this.hudCoinCardEl) {
+      this.hudCoinCardEl.classList.remove('bump');
+      void this.hudCoinCardEl.offsetWidth;
+      this.hudCoinCardEl.classList.add('bump');
+    }
+
+    if (isGolden) {
+      sound.coin();
     }
 
     // Check Exponential Level Progression
@@ -595,7 +618,7 @@ export class BigBadChickenGame {
     if (!this.comboBadgeEl || !this.comboTextEl) return;
     if (this.comboCount >= 2) {
       this.comboBadgeEl.classList.add('active');
-      this.comboTextEl.textContent = `${this.comboCount}x COMBO (${this.comboMultiplier.toFixed(1)}x)`;
+      this.comboTextEl.textContent = `${this.comboCount}x COMBO (${this.comboMultiplier.toFixed(1)}x COINS & XP!)`;
     } else {
       this.comboBadgeEl.classList.remove('active');
     }
