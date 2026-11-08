@@ -1,15 +1,24 @@
-name: Deploy Game to Production
+# DEPRECATED: Automatic push-based SSH/rsync deployment to the persistent Linode VPS
+# has been replaced by the centralized bundler & container workflow in `server-game-manager`
+# (`python scripts/bundle_all.py` / Docker / Cloud Run).
+#
+# Automatic `on: push` triggers have been disabled so commits do not fail when
+# the on-demand server is spun down.
+
+name: "[DEPRECATED] Legacy SSH Deploy to Linode"
 
 on:
-  push:
-    branches:
-      - main
-      - master
   workflow_dispatch:
+    inputs:
+      confirm_legacy_deploy:
+        description: "Type 'yes' to run legacy SSH rsync to a running server"
+        required: true
+        default: "no"
 
 jobs:
   deploy:
-    name: Deploy to Hefty Raccoon Arcade
+    name: Legacy SSH Rsync (big-bad-chicken)
+    if: ${{ github.event.inputs.confirm_legacy_deploy == 'yes' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +30,7 @@ jobs:
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.SERVER_HOST || 'game.heftyracoon.com' }}
-          REMOTE_USER: ${{ secrets.SERVER_USER || 'root' }}
+          REMOTE_USER: ${{ secrets.SERVER_USER || 'deploy' }}
           REMOTE_PORT: ${{ secrets.SERVER_PORT || '2348' }}
           TARGET: "/var/www/html/games/big-bad-chicken"
           ARGS: "-rlgoDzvc -i --delete"
@@ -29,5 +38,4 @@ jobs:
           SCRIPT_BEFORE: |
             mkdir -p /var/www/html/games/big-bad-chicken
           SCRIPT_AFTER: |
-            chown -R www-data:www-data /var/www/html/games/big-bad-chicken
             chmod -R 755 /var/www/html/games/big-bad-chicken
